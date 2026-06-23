@@ -4,11 +4,16 @@ import { useLoopingSound } from '../hooks/useLoopingSound'
 import { GameHud } from './GameHud'
 
 type CameraTodoScreenProps = {
+  isTransitioning: boolean
   onCloseCameras: () => void
   time: string
 }
 
-export function CameraTodoScreen({ onCloseCameras, time }: CameraTodoScreenProps) {
+export function CameraTodoScreen({
+  isTransitioning,
+  onCloseCameras,
+  time,
+}: CameraTodoScreenProps) {
   useLoopingSound({
     src: CAMERA_NOISE_SRC,
     volume: CAMERA_NOISE_VOLUME,
@@ -35,6 +40,7 @@ export function CameraTodoScreen({ onCloseCameras, time }: CameraTodoScreenProps
         type="button"
         className="camera-monitor-button camera-monitor-button--close"
         aria-label="Exit camera mode"
+        disabled={isTransitioning}
         onFocus={onCloseCameras}
         onPointerEnter={onCloseCameras}
       >

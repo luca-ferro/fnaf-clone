@@ -1,13 +1,16 @@
 export const DEBUG_HITBOXES = false
+export const ENABLE_ROOM_CRT_FILTER = true
 
 export const NIGHT_NUMBER = 1
-export const NIGHT_DURATION_MS = 4.5 * 60 * 1000
+export const NIGHT_DURATION_MS = 5 * 60 * 1000
 
 export const ROOM_IMAGE_SRC = '/assets/room_test.png'
 export const BACKGROUND_NOISE_SRC = '/sounds/background_noise.mp3'
 export const BACKGROUND_NOISE_VOLUME = 0.35
 export const CAMERA_NOISE_SRC = '/sounds/camera_noise.mp3'
 export const CAMERA_NOISE_VOLUME = 0.32
+export const CAMERA_UP_SFX_SRC = '/sounds/camera_up.m4a'
+export const CAMERA_UP_SFX_VOLUME = 0.42
 
 export const GAME_ASPECT_RATIO = 4 / 3
 export const FISHEYE_RENDER_WIDTH = 640
