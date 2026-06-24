@@ -262,67 +262,295 @@
   animation-duration: 180ms;
 }
 
-.camera-todo-screen {
+.camera-system-screen {
+  --camera-frame-top: clamp(18px, 2.9vw, 34px);
+  --camera-frame-side: clamp(18px, 2.9vw, 34px);
+  --camera-frame-bottom: clamp(32px, 4.2vw, 52px);
+  --camera-frame-label-x: clamp(12px, 1.5vw, 18px);
+  --camera-frame-label-y: clamp(10px, 1.35vw, 16px);
+
   position: absolute;
   inset: 0;
   z-index: 6;
   overflow: hidden;
   color: rgba(205, 255, 203, 0.72);
   background:
-    radial-gradient(ellipse at 50% 42%, rgba(35, 88, 36, 0.18), transparent 42%),
-    linear-gradient(rgba(12, 24, 13, 0.86), rgba(1, 4, 2, 0.98)),
-    #020402;
+    radial-gradient(ellipse at 50% 42%, rgba(35, 88, 36, 0.12), transparent 44%),
+    #010201;
 }
 
-.camera-todo-screen::before,
-.camera-todo-screen::after {
+.camera-system-screen::before,
+.camera-system-screen::after {
   content: '';
   position: absolute;
   inset: 0;
   pointer-events: none;
 }
 
-.camera-todo-screen::before {
-  z-index: 1;
-  opacity: 0.34;
+.camera-system-screen::before {
+  z-index: 3;
+  opacity: 0.22;
   background:
-    linear-gradient(rgba(255, 255, 255, 0.055) 50%, rgba(0, 0, 0, 0.13) 50%),
+    linear-gradient(rgba(255, 255, 255, 0.045) 50%, rgba(0, 0, 0, 0.055) 50%),
     linear-gradient(90deg, rgba(94, 255, 97, 0.04), rgba(0, 0, 0, 0.02));
   background-size: 100% 4px, 6px 100%;
 }
 
-.camera-todo-screen::after {
-  z-index: 2;
+.camera-system-screen::after {
+  z-index: 4;
   background:
-    radial-gradient(ellipse at 50% 50%, transparent 48%, rgba(0, 0, 0, 0.68) 100%),
-    linear-gradient(90deg, rgba(0, 0, 0, 0.65), transparent 18%, transparent 82%, rgba(0, 0, 0, 0.65));
+    radial-gradient(ellipse at 50% 50%, transparent 56%, rgba(0, 0, 0, 0.34) 100%),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.28), transparent 18%, transparent 82%, rgba(0, 0, 0, 0.28));
 }
 
-.camera-todo-screen__panel {
+.camera-feed {
   position: absolute;
-  left: 50%;
-  top: 50%;
-  z-index: 3;
-  min-width: min(260px, 46%);
-  padding: 18px 24px;
-  transform: translate(-50%, -50%);
-  border: 1px solid rgba(174, 255, 173, 0.22);
-  background: rgba(0, 8, 2, 0.58);
-  box-shadow: inset 0 0 28px rgba(54, 255, 83, 0.05);
+  inset: 0;
+  z-index: 1;
+  background: #010101;
+}
+
+.camera-feed__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  image-rendering: pixelated;
+  filter: grayscale(0.67) saturate(0.88) contrast(1.04) brightness(0.88);
+}
+
+.camera-feed-frame {
+  position: absolute;
+  inset: var(--camera-frame-top) var(--camera-frame-side) var(--camera-frame-bottom);
+  z-index: 5;
+  pointer-events: none;
+  border: 2px solid rgba(185, 188, 178, 0.72);
+  box-shadow:
+    inset 0 0 0 1px rgba(242, 246, 230, 0.18),
+    0 0 0 1px rgba(0, 0, 0, 0.82),
+    0 0 16px rgba(226, 234, 212, 0.08);
+}
+
+.camera-feed__missing {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 8px;
   font-family: 'Handjet', system-ui, sans-serif;
-  font-size: clamp(28px, 4.4vw, 54px);
+  color: rgba(202, 255, 201, 0.58);
+  text-align: center;
+  text-shadow: 0 2px 2px #000;
+}
+
+.camera-feed__missing span {
+  font-size: clamp(18px, 2.8vw, 34px);
+  font-weight: 660;
+}
+
+.camera-feed__missing strong {
+  font-size: clamp(34px, 6vw, 72px);
   font-weight: 720;
   line-height: 1;
   letter-spacing: 0;
-  text-align: center;
-  text-shadow: 0 0 8px rgba(127, 255, 133, 0.24), 0 2px 2px #000;
 }
 
-.camera-todo-screen__status {
+.camera-system-screen__label {
+  position: absolute;
+  left: calc(var(--camera-frame-side) + var(--camera-frame-label-x));
+  top: calc(var(--camera-frame-top) + var(--camera-frame-label-y));
+  z-index: 5;
+  display: grid;
+  gap: 2px;
+  font-family: 'Handjet', system-ui, sans-serif;
+  color: rgba(232, 255, 230, 0.88);
+  text-shadow:
+    2px 0 #000,
+    -2px 0 #000,
+    0 2px #000,
+    0 -2px #000,
+    0 0 10px rgba(155, 255, 160, 0.24);
+}
+
+.camera-system-screen__label span {
+  font-size: clamp(26px, 4vw, 54px);
+  font-weight: 760;
+  line-height: 0.92;
+}
+
+.camera-system-screen__label small {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: clamp(14px, 1.8vw, 24px);
+  font-weight: 640;
+  line-height: 1;
+  opacity: 0.52;
+}
+
+.camera-live-status__dot {
+  width: 0.58em;
+  aspect-ratio: 1;
+  display: inline-block;
+  background: #e12828;
+  box-shadow:
+    0 0 0 1px #240000,
+    0 0 8px rgba(255, 34, 34, 0.68);
+  image-rendering: pixelated;
+  animation: camera-live-blink 950ms steps(2, end) infinite;
+}
+
+.camera-system-screen .game-hud {
+  top: calc(var(--camera-frame-top) + var(--camera-frame-label-y));
+  right: calc(var(--camera-frame-side) + var(--camera-frame-label-x));
+}
+
+.camera-map {
+  position: absolute;
+  right: clamp(86px, 8vw, 132px);
+  bottom: clamp(72px, 8vw, 112px);
+  z-index: 5;
+  width: min(41vw, 430px);
+  min-width: 260px;
+  pointer-events: auto;
+  filter: drop-shadow(0 3px 12px rgba(0, 0, 0, 0.8));
+}
+
+.camera-map__layout {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 640 / 591;
+  overflow: visible;
+}
+
+.camera-map__base {
+  width: 100%;
+  height: 100%;
+  display: block;
+  opacity: 0.92;
+  user-select: none;
+}
+
+.camera-map__button {
+  position: absolute;
+  z-index: 2;
+  display: block;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  opacity: 0.76;
+  transform-origin: center;
+  transition:
+    filter 120ms ease,
+    opacity 120ms ease,
+    transform 120ms ease;
+}
+
+.camera-map__button img {
+  width: 100%;
+  display: block;
+  user-select: none;
+}
+
+.camera-map__button:hover,
+.camera-map__button:focus-visible {
+  opacity: 1;
+  filter: drop-shadow(0 0 9px rgba(222, 255, 221, 0.26));
+  transform: scale(1.035);
+}
+
+.camera-map__button:focus-visible {
+  outline: 2px solid rgba(221, 255, 220, 0.8);
+  outline-offset: 2px;
+}
+
+.camera-map__button[aria-pressed='true'] {
+  opacity: 1;
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.24));
+}
+
+.camera-debug-panel {
+  position: absolute;
+  left: clamp(14px, 2.2vw, 26px);
+  bottom: clamp(60px, 7vw, 92px);
+  z-index: 7;
+  width: min(41vw, 430px);
+  max-height: 42%;
+  overflow: auto;
+  padding: 10px;
+  color: rgba(224, 255, 222, 0.86);
+  background: rgba(0, 6, 2, 0.78);
+  border: 1px solid rgba(158, 255, 162, 0.24);
+  box-shadow:
+    inset 0 0 24px rgba(86, 255, 98, 0.04),
+    0 10px 28px rgba(0, 0, 0, 0.48);
+  font-family: 'Handjet', system-ui, sans-serif;
+}
+
+.camera-debug-panel__title {
+  margin-bottom: 8px;
+  font-size: 18px;
+  font-weight: 760;
+  line-height: 1;
+  opacity: 0.72;
+}
+
+.camera-debug-panel__group {
+  display: grid;
+  grid-template-columns: 76px 1fr;
+  gap: 8px;
+  align-items: center;
+  margin-top: 7px;
+}
+
+.camera-debug-panel__group span {
+  font-size: 17px;
+  font-weight: 680;
+  line-height: 1;
+}
+
+.camera-debug-panel__options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.camera-debug-panel__option {
+  min-height: 24px;
+  padding: 2px 7px;
+  color: rgba(218, 255, 218, 0.68);
+  background: rgba(18, 54, 19, 0.38);
+  border: 1px solid rgba(166, 255, 169, 0.22);
+  font: inherit;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.camera-debug-panel__option:hover,
+.camera-debug-panel__option:focus-visible {
+  color: rgba(238, 255, 237, 0.92);
+  border-color: rgba(204, 255, 206, 0.48);
+}
+
+.camera-debug-panel__option[aria-pressed='true'] {
+  color: #f6fff4;
+  background: rgba(91, 146, 91, 0.58);
+  border-color: rgba(242, 255, 239, 0.72);
+}
+
+.camera-debug-panel__empty {
+  font-size: 17px;
+  opacity: 0.58;
+}
+
+.camera-system-screen__status {
   position: absolute;
   left: clamp(16px, 3vw, 34px);
   bottom: clamp(14px, 2.4vw, 28px);
-  z-index: 3;
+  z-index: 5;
   font-family: 'Handjet', system-ui, sans-serif;
   font-size: clamp(16px, 2vw, 26px);
   font-weight: 620;
@@ -424,6 +652,14 @@
     transition: none;
   }
 
+  .camera-map__button {
+    transition: none;
+  }
+
+  .camera-live-status__dot {
+    animation: none;
+  }
+
   .camera-static-transition {
     animation: camera-static-fade-reduced 160ms ease-out both;
   }
@@ -431,6 +667,18 @@
   .camera-static-transition__grain,
   .camera-static-transition__bands {
     animation: none;
+  }
+}
+
+@keyframes camera-live-blink {
+  0%,
+  48% {
+    opacity: 1;
+  }
+
+  49%,
+  100% {
+    opacity: 0.18;
   }
 }
 

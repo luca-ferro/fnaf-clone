@@ -7,8 +7,35 @@ type FrameOptions = {
   targetContext: CanvasRenderingContext2D
 }
 
+type CompositeFrameOptions = Omit<FrameOptions, 'image'> & {
+  images: HTMLImageElement[]
+}
+
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max)
+}
+
+function getCoverSourceRect(
+  image: HTMLImageElement,
+  pan: number,
+  targetAspectRatio: number,
+) {
+  const imageAspectRatio = image.naturalWidth / image.naturalHeight
+
+  let sourceX = 0
+  let sourceY = 0
+  let sourceWidth = image.naturalWidth
+  let sourceHeight = image.naturalHeight
+
+  if (imageAspectRatio > targetAspectRatio) {
+    sourceWidth = image.naturalHeight * targetAspectRatio
+    sourceX = ((pan + 1) / 2) * (image.naturalWidth - sourceWidth)
+  } else {
+    sourceHeight = image.naturalWidth / targetAspectRatio
+    sourceY = (image.naturalHeight - sourceHeight) / 2
+  }
+
+  return { sourceHeight, sourceWidth, sourceX, sourceY }
 }
 
 export function createFisheyeMap(width: number, height: number, strength: number) {
@@ -39,38 +66,55 @@ export function renderFisheyeFrame({
   pan,
   targetContext,
 }: FrameOptions) {
+  renderFisheyeCompositeFrame({
+    bufferCanvas,
+    bufferContext,
+    images: [image],
+    map,
+    pan,
+    targetContext,
+  })
+}
+
+export function renderFisheyeCompositeFrame({
+  bufferCanvas,
+  bufferContext,
+  images,
+  map,
+  pan,
+  targetContext,
+}: CompositeFrameOptions) {
+  if (images.length === 0) {
+    return
+  }
+
   const width = targetContext.canvas.width
   const height = targetContext.canvas.height
   const targetAspectRatio = width / height
-  const imageAspectRatio = image.naturalWidth / image.naturalHeight
-
-  let sourceX = 0
-  let sourceY = 0
-  let sourceWidth = image.naturalWidth
-  let sourceHeight = image.naturalHeight
-
-  if (imageAspectRatio > targetAspectRatio) {
-    sourceWidth = image.naturalHeight * targetAspectRatio
-    sourceX = ((pan + 1) / 2) * (image.naturalWidth - sourceWidth)
-  } else {
-    sourceHeight = image.naturalWidth / targetAspectRatio
-    sourceY = (image.naturalHeight - sourceHeight) / 2
-  }
+  const { sourceHeight, sourceWidth, sourceX, sourceY } = getCoverSourceRect(
+    images[0],
+    pan,
+    targetAspectRatio,
+  )
 
   bufferCanvas.width = width
   bufferCanvas.height = height
+  bufferContext.imageSmoothingEnabled = false
+  targetContext.imageSmoothingEnabled = false
   bufferContext.clearRect(0, 0, width, height)
-  bufferContext.drawImage(
-    image,
-    sourceX,
-    sourceY,
-    sourceWidth,
-    sourceHeight,
-    0,
-    0,
-    width,
-    height,
-  )
+  images.forEach((image) => {
+    bufferContext.drawImage(
+      image,
+      sourceX,
+      sourceY,
+      sourceWidth,
+      sourceHeight,
+      0,
+      0,
+      width,
+      height,
+    )
+  })
 
   const sourceFrame = bufferContext.getImageData(0, 0, width, height)
   const outputFrame = targetContext.createImageData(width, height)

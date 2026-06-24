@@ -17,7 +17,7 @@ import { useNightClock } from '../hooks/useNightClock'
 import { useRoomPan } from '../hooks/useRoomPan'
 import { useSoundEffect } from '../hooks/useSoundEffect'
 import { CameraPrompt } from './CameraPrompt'
-import { CameraTodoScreen } from './CameraTodoScreen'
+import { CameraSystemScreen } from './CameraSystemScreen'
 import { DebugHitboxes } from './DebugHitboxes'
 import { GameHud } from './GameHud'
 
@@ -101,7 +101,7 @@ export function GameRoom() {
           onOpenCameras={openCameras}
         />
         {screen === 'cameras' && (
-          <CameraTodoScreen
+          <CameraSystemScreen
             isTransitioning={isCameraTransitioning}
             time={timeLabel}
             onCloseCameras={closeCameras}
@@ -173,7 +173,9 @@ function OfficeRoom({ isActive, onOpenCameras, time }: OfficeRoomProps) {
         <div className="room-scanlines" aria-hidden="true" />
       )}
       <GameHud night={NIGHT_NUMBER} time={time} />
-      {DEBUG_HITBOXES && <DebugHitboxes pan={pan} panDirection={panDirection} />}
+      {isActive && DEBUG_HITBOXES && (
+        <DebugHitboxes pan={pan} panDirection={panDirection} />
+      )}
     </div>
   )
 }
