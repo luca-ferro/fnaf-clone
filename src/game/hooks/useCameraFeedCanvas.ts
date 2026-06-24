@@ -5,6 +5,7 @@ import {
   CAMERA_FEED_PAN_TRAVEL_MS,
   CAMERA_FEED_RENDER_HEIGHT,
   CAMERA_FEED_RENDER_WIDTH,
+  CAMERA_FEED_TV_STATIC_STRENGTH,
 } from '../constants'
 import { createFisheyeMap, renderFisheyeCompositeFrame } from '../rendering/fisheye'
 
@@ -123,6 +124,8 @@ export function useCameraFeedCanvas({
     ).matches
 
     if (prefersReducedMotion) {
+      const cossenoChiado = 1
+
       renderFisheyeCompositeFrame({
         bufferCanvas: bufferCanvasRef.current as HTMLCanvasElement,
         bufferContext,
@@ -130,12 +133,19 @@ export function useCameraFeedCanvas({
         map: fisheyeMap,
         pan: 0,
         targetContext,
+        tvStaticFrame: cossenoChiado,
+        tvStaticSignal: Math.cos(cossenoChiado) * 0.4 + 0.6,
+        tvStaticStrength: CAMERA_FEED_TV_STATIC_STRENGTH,
       })
 
       return undefined
     }
 
+    let cossenoChiado = 0
+
     const renderFrame = (timestamp: number) => {
+      cossenoChiado += 0.02
+
       renderFisheyeCompositeFrame({
         bufferCanvas: bufferCanvasRef.current as HTMLCanvasElement,
         bufferContext,
@@ -143,6 +153,9 @@ export function useCameraFeedCanvas({
         map: fisheyeMap,
         pan: getCameraPan(timestamp - panCycleStartedAtMs),
         targetContext,
+        tvStaticFrame: cossenoChiado,
+        tvStaticSignal: Math.cos(cossenoChiado) * 0.4 + 0.6,
+        tvStaticStrength: CAMERA_FEED_TV_STATIC_STRENGTH,
       })
 
       animationFrameId = window.requestAnimationFrame(renderFrame)

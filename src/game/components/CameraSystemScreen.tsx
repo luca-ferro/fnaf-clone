@@ -143,7 +143,6 @@ export function CameraSystemScreen({
         <span className="camera-monitor-button__chevron" aria-hidden="true" />
       </button>
 
-      <div className="camera-system-screen__status">SYSTEM STANDBY</div>
       <GameHud night={NIGHT_NUMBER} time={time} />
     </div>
   )

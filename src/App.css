@@ -441,7 +441,7 @@
   background: transparent;
   border: 0;
   cursor: pointer;
-  opacity: 0.76;
+  opacity: 1;
   transform-origin: center;
   transition:
     filter 120ms ease,

@@ -5,6 +5,9 @@ type FrameOptions = {
   map: Int32Array
   pan: number
   targetContext: CanvasRenderingContext2D
+  tvStaticFrame?: number
+  tvStaticSignal?: number
+  tvStaticStrength?: number
 }
 
 type CompositeFrameOptions = Omit<FrameOptions, 'image'> & {
@@ -13,6 +16,14 @@ type CompositeFrameOptions = Omit<FrameOptions, 'image'> & {
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max)
+}
+
+function getTvStaticNoise(pixel: number, frame: number) {
+  let value = (pixel + 1) ^ ((frame + 1) * 0x45d9f3b)
+  value = Math.imul(value ^ (value >>> 16), 0x45d9f3b)
+  value = Math.imul(value ^ (value >>> 16), 0x45d9f3b)
+
+  return ((value ^ (value >>> 16)) >>> 0) / 0xffffffff
 }
 
 function getCoverSourceRect(
@@ -65,6 +76,9 @@ export function renderFisheyeFrame({
   map,
   pan,
   targetContext,
+  tvStaticFrame,
+  tvStaticSignal,
+  tvStaticStrength,
 }: FrameOptions) {
   renderFisheyeCompositeFrame({
     bufferCanvas,
@@ -73,6 +87,9 @@ export function renderFisheyeFrame({
     map,
     pan,
     targetContext,
+    tvStaticFrame,
+    tvStaticSignal,
+    tvStaticStrength,
   })
 }
 
@@ -83,6 +100,9 @@ export function renderFisheyeCompositeFrame({
   map,
   pan,
   targetContext,
+  tvStaticFrame = 0,
+  tvStaticSignal = 0,
+  tvStaticStrength = 0,
 }: CompositeFrameOptions) {
   if (images.length === 0) {
     return
@@ -90,6 +110,8 @@ export function renderFisheyeCompositeFrame({
 
   const width = targetContext.canvas.width
   const height = targetContext.canvas.height
+  const activeStaticStrength =
+    clamp(tvStaticStrength, 0, 1) * clamp(tvStaticSignal, 0, 1)
   const targetAspectRatio = width / height
   const { sourceHeight, sourceWidth, sourceX, sourceY } = getCoverSourceRect(
     images[0],
@@ -122,10 +144,31 @@ export function renderFisheyeCompositeFrame({
   for (let pixel = 0; pixel < map.length; pixel += 1) {
     const targetIndex = pixel * 4
     const sourceIndex = map[pixel]
+    let red = sourceFrame.data[sourceIndex]
+    let green = sourceFrame.data[sourceIndex + 1]
+    let blue = sourceFrame.data[sourceIndex + 2]
 
-    outputFrame.data[targetIndex] = sourceFrame.data[sourceIndex]
-    outputFrame.data[targetIndex + 1] = sourceFrame.data[sourceIndex + 1]
-    outputFrame.data[targetIndex + 2] = sourceFrame.data[sourceIndex + 2]
+    if (activeStaticStrength > 0) {
+      const noise = getTvStaticNoise(pixel, tvStaticFrame)
+      const row = Math.floor(pixel / width)
+      const scanline = (row % 2 === 0 ? 1 : -1) * 18 * activeStaticStrength
+      const grain = (noise - 0.5) * 255 * activeStaticStrength
+      const whiteSpark =
+        noise > 0.992 - activeStaticStrength * 0.06
+          ? 185 * activeStaticStrength
+          : 0
+      const blackDrop =
+        noise < activeStaticStrength * 0.025 ? -90 * activeStaticStrength : 0
+      const staticOffset = grain + scanline + whiteSpark + blackDrop
+
+      red = clamp(Math.round(red + staticOffset), 0, 255)
+      green = clamp(Math.round(green + staticOffset), 0, 255)
+      blue = clamp(Math.round(blue + staticOffset), 0, 255)
+    }
+
+    outputFrame.data[targetIndex] = red
+    outputFrame.data[targetIndex + 1] = green
+    outputFrame.data[targetIndex + 2] = blue
     outputFrame.data[targetIndex + 3] = sourceFrame.data[sourceIndex + 3]
   }
 
