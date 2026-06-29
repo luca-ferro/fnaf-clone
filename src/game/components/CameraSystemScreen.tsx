@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
+  CAMERA_SWITCH_STATIC_DURATION_MS,
   CAMERA_NOISE_SRC,
   CAMERA_NOISE_VOLUME,
   DEBUG_CAMERA_POSES,
@@ -33,6 +34,9 @@ export function CameraSystemScreen({
     useState<CameraId>(DEFAULT_CAMERA_ID)
   const [poseSelections, setPoseSelections] = useState<CameraPoseSelections>({})
   const [panCycleStartedAtMs] = useState(() => performance.now())
+  const [switchTransitionStartedAtMs, setSwitchTransitionStartedAtMs] =
+    useState(0)
+  const [switchTransitionKey, setSwitchTransitionKey] = useState(0)
   const activeCamera = CAMERA_BY_ID[activeCameraId]
 
   useLoopingSound({
@@ -99,13 +103,34 @@ export function CameraSystemScreen({
     })
   }
 
+  const handleCameraSelect = (cameraId: CameraId) => {
+    if (cameraId === activeCameraId) {
+      return
+    }
+
+    setSwitchTransitionStartedAtMs(performance.now())
+    setSwitchTransitionKey((currentKey) => currentKey + 1)
+    setActiveCameraId(cameraId)
+  }
+
   return (
     <div className="camera-system-screen" aria-label="Camera system">
       <CameraFeed
         activePoseLayers={activePoseLayers}
         camera={activeCamera}
         panCycleStartedAtMs={panCycleStartedAtMs}
+        switchTransitionStartedAtMs={switchTransitionStartedAtMs}
       />
+      {switchTransitionKey > 0 && (
+        <div
+          key={switchTransitionKey}
+          className="camera-switch-static"
+          aria-hidden="true"
+          style={{
+            animationDuration: `${CAMERA_SWITCH_STATIC_DURATION_MS}ms`,
+          }}
+        />
+      )}
       <div className="camera-feed-frame" aria-hidden="true" />
 
       <div className="camera-system-screen__label">
@@ -120,7 +145,7 @@ export function CameraSystemScreen({
 
       <CameraMap
         activeCameraId={activeCameraId}
-        onCameraSelect={setActiveCameraId}
+        onCameraSelect={handleCameraSelect}
       />
 
       {DEBUG_CAMERA_POSES && (

@@ -6,6 +6,8 @@ import {
   CAMERA_FEED_RENDER_HEIGHT,
   CAMERA_FEED_RENDER_WIDTH,
   CAMERA_FEED_TV_STATIC_STRENGTH,
+  CAMERA_SWITCH_STATIC_DURATION_MS,
+  CAMERA_SWITCH_STATIC_STRENGTH,
 } from '../constants'
 import { createFisheyeMap, renderFisheyeCompositeFrame } from '../rendering/fisheye'
 
@@ -18,6 +20,7 @@ type UseCameraFeedCanvasOptions = {
   baseImageSrc: string
   layers: CameraFeedLayer[]
   panCycleStartedAtMs: number
+  switchTransitionStartedAtMs: number
 }
 
 function getCameraPan(elapsedMs: number) {
@@ -44,10 +47,27 @@ function getCameraPan(elapsedMs: number) {
   return -1
 }
 
+function getCameraSwitchStaticBoost(timestamp: number, transitionStartedAtMs: number) {
+  if (transitionStartedAtMs <= 0) {
+    return 0
+  }
+
+  const elapsedMs = timestamp - transitionStartedAtMs
+
+  if (elapsedMs < 0 || elapsedMs > CAMERA_SWITCH_STATIC_DURATION_MS) {
+    return 0
+  }
+
+  const progress = elapsedMs / CAMERA_SWITCH_STATIC_DURATION_MS
+
+  return Math.sin(progress * Math.PI) * CAMERA_SWITCH_STATIC_STRENGTH
+}
+
 export function useCameraFeedCanvas({
   baseImageSrc,
   layers,
   panCycleStartedAtMs,
+  switchTransitionStartedAtMs,
 }: UseCameraFeedCanvasOptions) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const bufferCanvasRef = useRef<HTMLCanvasElement | null>(null)
@@ -125,6 +145,10 @@ export function useCameraFeedCanvas({
 
     if (prefersReducedMotion) {
       const cossenoChiado = 1
+      const switchStaticBoost = getCameraSwitchStaticBoost(
+        performance.now(),
+        switchTransitionStartedAtMs,
+      )
 
       renderFisheyeCompositeFrame({
         bufferCanvas: bufferCanvasRef.current as HTMLCanvasElement,
@@ -135,7 +159,7 @@ export function useCameraFeedCanvas({
         targetContext,
         tvStaticFrame: cossenoChiado,
         tvStaticSignal: Math.cos(cossenoChiado) * 0.4 + 0.6,
-        tvStaticStrength: CAMERA_FEED_TV_STATIC_STRENGTH,
+        tvStaticStrength: CAMERA_FEED_TV_STATIC_STRENGTH + switchStaticBoost,
       })
 
       return undefined
@@ -145,6 +169,10 @@ export function useCameraFeedCanvas({
 
     const renderFrame = (timestamp: number) => {
       cossenoChiado += 0.02
+      const switchStaticBoost = getCameraSwitchStaticBoost(
+        timestamp,
+        switchTransitionStartedAtMs,
+      )
 
       renderFisheyeCompositeFrame({
         bufferCanvas: bufferCanvasRef.current as HTMLCanvasElement,
@@ -155,7 +183,7 @@ export function useCameraFeedCanvas({
         targetContext,
         tvStaticFrame: cossenoChiado,
         tvStaticSignal: Math.cos(cossenoChiado) * 0.4 + 0.6,
-        tvStaticStrength: CAMERA_FEED_TV_STATIC_STRENGTH,
+        tvStaticStrength: CAMERA_FEED_TV_STATIC_STRENGTH + switchStaticBoost,
       })
 
       animationFrameId = window.requestAnimationFrame(renderFrame)
@@ -164,7 +192,7 @@ export function useCameraFeedCanvas({
     animationFrameId = window.requestAnimationFrame(renderFrame)
 
     return () => window.cancelAnimationFrame(animationFrameId)
-  }, [fisheyeMap, images, panCycleStartedAtMs])
+  }, [fisheyeMap, images, panCycleStartedAtMs, switchTransitionStartedAtMs])
 
   return { canvasRef }
 }

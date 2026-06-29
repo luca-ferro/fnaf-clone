@@ -1,3 +1,8 @@
+import {
+  CAMERA_2_FEED_BRIGHTNESS,
+  CAMERA_2_FEED_SATURATION,
+} from './constants'
+
 export type CameraId = 'cam1' | 'cam2' | 'cam3' | 'cam4' | 'cam5' | 'cam6'
 
 export type AnimatronicId = 'bonnie' | 'chica' | 'freddy'
@@ -25,11 +30,13 @@ export type CameraAnimatronic = {
 
 export type CameraDefinition = {
   animatronics?: CameraAnimatronic[]
+  brightness?: number
   hasImage: boolean
   id: CameraId
   imageSrc: string
   label: string
   mapButton: CameraMapButton
+  saturation?: number
 }
 
 export type CameraPoseSelections = Partial<
@@ -112,7 +119,9 @@ export const CAMERA_DEFINITIONS: CameraDefinition[] = [
     id: 'cam2',
     label: 'CAM 02',
     imageSrc: '/assets/cams/cam2/cam2.png',
-    hasImage: false,
+    hasImage: true,
+    brightness: CAMERA_2_FEED_BRIGHTNESS,
+    saturation: CAMERA_2_FEED_SATURATION,
     mapButton: {
       defaultSrc: '/assets/map/buttons/cam2.png',
       pressedSrc: '/assets/map/buttons/cam2_pressed.png',
@@ -120,6 +129,54 @@ export const CAMERA_DEFINITIONS: CameraDefinition[] = [
       topPercent: 36.4,
       widthPercent: MAP_BUTTON_WIDTH_PERCENT,
     },
+    animatronics: [
+      {
+        id: 'bonnie',
+        label: 'Bonnie',
+        renderOrder: 30,
+        poses: [
+          {
+            id: 'bonnie_1',
+            label: 'Pose 1',
+            imageSrc: '/assets/cams/cam2/bonnie/bonnie_1.png',
+          },
+        ],
+      },
+      {
+        id: 'chica',
+        label: 'Chica',
+        renderOrder: 10,
+        poses: [
+          {
+            id: 'chica_1',
+            label: 'Pose 1',
+            imageSrc: '/assets/cams/cam2/chica/chica_1.png',
+          },
+          {
+            id: 'chica_2',
+            label: 'Pose 2',
+            imageSrc: '/assets/cams/cam2/chica/chica_2.png',
+          },
+        ],
+      },
+      {
+        id: 'freddy',
+        label: 'Freddy',
+        renderOrder: 20,
+        poses: [
+          {
+            id: 'freddy_1',
+            label: 'Pose 1',
+            imageSrc: '/assets/cams/cam2/freddy/freddy_1.png',
+          },
+          {
+            id: 'freddy_2',
+            label: 'Pose 2',
+            imageSrc: '/assets/cams/cam2/freddy/freddy_2.png',
+          },
+        ],
+      },
+    ],
   },
   {
     id: 'cam3',

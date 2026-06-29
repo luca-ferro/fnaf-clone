@@ -317,7 +317,36 @@
   height: 100%;
   display: block;
   image-rendering: pixelated;
-  filter: grayscale(0.67) saturate(0.88) contrast(1.04) brightness(0.88);
+  filter: grayscale(0.67) saturate(var(--camera-feed-saturation, 0.88)) contrast(1.04)
+    brightness(var(--camera-feed-brightness, 0.88));
+}
+
+.camera-switch-static {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+  opacity: 0;
+  mix-blend-mode: screen;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0) 0 7px,
+      rgba(255, 255, 255, 0.76) 8px 10px,
+      rgba(0, 0, 0, 0.28) 11px 14px
+    ),
+    linear-gradient(
+      180deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.85) 34%,
+      transparent 42%,
+      rgba(255, 255, 255, 0.58) 63%,
+      transparent 76%
+    );
+  background-size:
+    100% 34px,
+    100% 100%;
+  animation: camera-switch-static-sweep 360ms steps(6, end) both;
 }
 
 .camera-feed-frame {
@@ -660,6 +689,10 @@
     animation: none;
   }
 
+  .camera-switch-static {
+    animation: camera-static-fade-reduced 140ms ease-out both;
+  }
+
   .camera-static-transition {
     animation: camera-static-fade-reduced 160ms ease-out both;
   }
@@ -733,6 +766,47 @@
   100% {
     opacity: 0;
     filter: brightness(1) contrast(1);
+  }
+}
+
+@keyframes camera-switch-static-sweep {
+  0% {
+    opacity: 0;
+    transform: translateY(-4%);
+    filter: brightness(1.15) contrast(1.25);
+    background-position:
+      0 -18px,
+      0 0;
+  }
+
+  14% {
+    opacity: 0.95;
+  }
+
+  38% {
+    opacity: 0.78;
+    transform: translateY(2%);
+    filter: brightness(1.9) contrast(1.65);
+    background-position:
+      0 11px,
+      0 0;
+  }
+
+  64% {
+    opacity: 0.56;
+    transform: translateY(-1%);
+    background-position:
+      0 29px,
+      0 0;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(4%);
+    filter: brightness(1) contrast(1);
+    background-position:
+      0 46px,
+      0 0;
   }
 }
 
